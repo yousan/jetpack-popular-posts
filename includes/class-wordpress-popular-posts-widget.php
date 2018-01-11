@@ -82,13 +82,17 @@ class WPP_Widget extends WP_Widget {
 		        $top_posts = stats_get_csv( 'postviews', 'days=' . $days . '&limit=' . ( $limit + 100 ) );
 		        $posts_to_show = array(); // 実際に表示する投稿
 		        foreach ( $top_posts  as $post ) { // 投稿タイプの絞り込みを行う
-                    if ( (int)$post['post_id'] !== 0 && get_post_type( (int)$post['post_id'] ) === 'post' ) { // Only for 'post'
+                    // var_dump($post['post_id'], get_post_type( (int)$post['post_id'] ));
+			        if ( (int)$post['post_id'] !== 0 &&
+                         get_post_type( (int)$post['post_id'] ) === 'post' ) { // Only for 'post'
+                        // var_dump($post);
                         $posts_to_show[] = $post;
                     }
 			        if ( count( $posts_to_show ) >= $limit ) { // 件数分集まったらやめる
 				        break;
 			        }
                 }
+		        // exit;
 
 		        foreach ( $posts_to_show as $post ) {
                     $id = $post['post_id'];
@@ -105,6 +109,7 @@ class WPP_Widget extends WP_Widget {
                                  class="wpp-thumbnail wpp_cached_thumb wpp_featured"
                                  width="<?php echo $size[0]; ?>"
                                  height="<?php echo $size[1]; ?>"
+                                 style="width: <?php echo $size[0]; ?>px; height: <?php echo $size[1]; ?>px; overflow: hidden;"
                             >
                         </a>
                         <a href="<?php echo get_permalink( $id ); ?>"

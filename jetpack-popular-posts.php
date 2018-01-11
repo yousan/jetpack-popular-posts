@@ -7,7 +7,7 @@
  * Author URI:      YOUR SITE HERE
  * Text Domain:     jetpack-popular-posts
  * Domain Path:     /languages
- * Version:         0.1.1
+ * Version:         4.0.13.1
  *
  * @package         Jetpack_Popular_Posts
  */

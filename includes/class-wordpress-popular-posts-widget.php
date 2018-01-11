@@ -52,50 +52,69 @@ class WPP_Widget extends WP_Widget {
 		 * @var string $widget_name
 		 */
 		extract( $args, EXTR_SKIP );
+		$title = apply_filters( 'widget_title', $instance['title'] );
 
-		$days  = 7;
-		$limit = 20;
-		$size  = array( 75, 75 ); // width, height
+		// WPPのオプションとして、24時間、7日間、30日間といった選択肢がセレクトボックスで与えられる。
+        // その文字列をJetpackの集計期間日数に置き換える
+		$days_options = array(
+			'daily'   => 1,
+			'weekly'  => 7,
+			'monthly' => 30,
+			'all'     => 100, // 未定義
+			'custom'  => 7, // 未定義
+		);
+
+		$days  = $days_options[ $instance['range'] ];
+		$limit = isset( $instance['limit'] ) ? (int) $instance['limit'] : 5; // 未指定で5件決め打ち
+		$size  = array(
+			isset( $instance['thumbnail']['width'] )
+				? (int) $instance['thumbnail']['width'] : 0,
+			isset( $instance['thumbnail']['height'] )
+				? (int) $instance['thumbnail']['height'] : 0,
+		); // width, height
 
 		echo '<!-- Jetpack Popular Posts feat. WordPress Popular Posts Plugin [W] [weekly] [views] [regular] -->' . PHP_EOL;
 		?>
         <div id="<?php echo $widget_id; ?>" class="widget popular-posts">
-            <div class="widgettitle">おすすめ人気記事</div><!-- cached -->
+            <?php echo $before_title . $title . $after_title; ?>
             <ul class="wpp-list wpp-list-with-thumbnails">
 		        <?php
-		        $top_posts = stats_get_csv( 'postviews', 'days=' . $days . '&limit=' . ( $limit + 10 ) );
-		        $i         = 0;
-		        foreach ( $top_posts as $value ) {
-			        $my_id = $value['post_id'];
-			        if ( $my_id !== 0 && get_post_type( $my_id ) === 'post' ) { // Only for 'post'
-				        if ( $imgurl = get_the_post_thumbnail_url($my_id) ) { // If the post has thumbnail
-					        ?>
-                            <li>
-                                <a href="<?php echo get_permalink( $my_id ); ?>"
-                                   title="<?php echo get_the_title( $my_id ); ?>"
-                                   target="_self">
-                                    <img src="<?php echo $imgurl; ?>" title="<?php get_the_title( $my_id ); ?>"
-                                         alt="<?php echo get_the_title( $my_id ); ?>"
-                                         class="wpp-thumbnail wpp_cached_thumb wpp_featured"
-                                         width="<?php echo $size[0]; ?>"
-                                         height="<?php echo $size[1]; ?>"
-                                    >
-                                </a>
-                                <a href="<?php echo get_permalink( $my_id ); ?>"
-                                   title="<?php echo get_the_title( $my_id ); ?>"
-                                   class="wpp-post-title" target="_self"><?php echo get_the_title( $my_id ); ?></a>
-                            </li>
-					        <?php
-				        } else {
-                            echo '<li><a href="' . get_permalink( $my_id ) . '" title="' . get_the_title( $my_id ) . '" target="_self"><img title="' . get_the_title( $my_id ) . '" alt="' . get_the_title( $my_id ) . '" class="wpp-thumbnail wpp_cached_thumb wpp_first_image" height="200" width="200"></a><div class="thumbnail-title"><a href="' . get_permalink( $my_id ) . '" title="' . get_the_title( $my_id ) . '" class="wpp-post-title" target="_self">' . get_the_title( $my_id ) . '</a></div></li>';
-				        }
-				        $i ++;
-				        if ( $i === $limit ) {
-					        break;
-				        }
+		        $top_posts = stats_get_csv( 'postviews', 'days=' . $days . '&limit=' . ( $limit + 100 ) );
+		        $posts_to_show = array(); // 実際に表示する投稿
+		        foreach ( $top_posts  as $post ) { // 投稿タイプの絞り込みを行う
+                    if ( (int)$post['post_id'] !== 0 && get_post_type( (int)$post['post_id'] ) === 'post' ) { // Only for 'post'
+                        $posts_to_show[] = $post;
+                    }
+			        if ( count( $posts_to_show ) > $limit ) { // 件数分集まったらやめる
+				        break;
 			        }
-		        }
-		        ?>
+                }
+
+		        foreach ( $posts_to_show as $post ) {
+                    $id = $post['id'];
+                    if (  $imgurl = get_the_post_thumbnail_url($post['id']) ) { // If the post has thumbnail
+                        ?>
+                        <li>
+                            <a href="<?php echo get_permalink( $id ); ?>"
+                               title="<?php echo get_the_title( $id ); ?>"
+                               target="_self">
+                                <img src="<?php echo $imgurl; ?>" title="<?php get_the_title( $id ); ?>"
+                                     alt="<?php echo get_the_title( $id ); ?>"
+                                     class="wpp-thumbnail wpp_cached_thumb wpp_featured"
+                                     width="<?php echo $size[0]; ?>"
+                                     height="<?php echo $size[1]; ?>"
+                                >
+                            </a>
+                            <a href="<?php echo get_permalink( $id ); ?>"
+                               title="<?php echo get_the_title( $id ); ?>"
+                               class="wpp-post-title" target="_self"><?php echo get_the_title( $id ); ?></a>
+                        </li>
+                        <?php
+                    } else {
+                        echo '<li><a href="' . get_permalink( $id ) . '" title="' . get_the_title( $id ) . '" target="_self"><img title="' . get_the_title( $id ) . '" alt="' . get_the_title( $id ) . '" class="wpp-thumbnail wpp_cached_thumb wpp_first_image" height="200" width="200"></a><div class="thumbnail-title"><a href="' . get_permalink( $id ) . '" title="' . get_the_title( $id ) . '" class="wpp-post-title" target="_self">' . get_the_title( $id ) . '</a></div></li>';
+                    }
+                }
+                ?>
             </ul>
         </div>
 		<?php
@@ -213,13 +232,12 @@ class WPP_Widget extends WP_Widget {
      */
     public function form( $instance ){
 
-//        $instance = WPP_Helper::merge_array_r(
-//            WPP_Settings::$defaults[ 'widget_options' ],
-//            (array) $instance
-//        );
-//        $wpp_image = WPP_Image::get_instance();
-        echo '';
-        // include( plugin_dir_path( __FILE__ ) . '/widget-form.php' );
+        $instance = WPP_Helper::merge_array_r(
+            WPP_Settings::$defaults[ 'widget_options' ],
+            (array) $instance
+        );
+        $wpp_image = WPP_Image::get_instance();
+        include( plugin_dir_path( __FILE__ ) . '/widget-form.php' );
 
     }
 

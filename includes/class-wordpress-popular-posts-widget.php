@@ -85,34 +85,35 @@ class WPP_Widget extends WP_Widget {
                     if ( (int)$post['post_id'] !== 0 && get_post_type( (int)$post['post_id'] ) === 'post' ) { // Only for 'post'
                         $posts_to_show[] = $post;
                     }
-			        if ( count( $posts_to_show ) > $limit ) { // 件数分集まったらやめる
+			        if ( count( $posts_to_show ) >= $limit ) { // 件数分集まったらやめる
 				        break;
 			        }
                 }
 
 		        foreach ( $posts_to_show as $post ) {
-                    $id = $post['id'];
-                    if (  $imgurl = get_the_post_thumbnail_url($post['id']) ) { // If the post has thumbnail
-                        ?>
-                        <li>
-                            <a href="<?php echo get_permalink( $id ); ?>"
-                               title="<?php echo get_the_title( $id ); ?>"
-                               target="_self">
-                                <img src="<?php echo $imgurl; ?>" title="<?php get_the_title( $id ); ?>"
-                                     alt="<?php echo get_the_title( $id ); ?>"
-                                     class="wpp-thumbnail wpp_cached_thumb wpp_featured"
-                                     width="<?php echo $size[0]; ?>"
-                                     height="<?php echo $size[1]; ?>"
-                                >
-                            </a>
-                            <a href="<?php echo get_permalink( $id ); ?>"
-                               title="<?php echo get_the_title( $id ); ?>"
-                               class="wpp-post-title" target="_self"><?php echo get_the_title( $id ); ?></a>
-                        </li>
-                        <?php
-                    } else {
-                        echo '<li><a href="' . get_permalink( $id ) . '" title="' . get_the_title( $id ) . '" target="_self"><img title="' . get_the_title( $id ) . '" alt="' . get_the_title( $id ) . '" class="wpp-thumbnail wpp_cached_thumb wpp_first_image" height="200" width="200"></a><div class="thumbnail-title"><a href="' . get_permalink( $id ) . '" title="' . get_the_title( $id ) . '" class="wpp-post-title" target="_self">' . get_the_title( $id ) . '</a></div></li>';
-                    }
+                    $id = $post['post_id'];
+                    ?>
+                    <li>
+                        <a href="<?php echo get_permalink( $id ); ?>"
+                           title="<?php echo get_the_title( $id ); ?>"
+                           target="_self">
+                            <img title="<?php get_the_title( $id ); ?>"
+                                 <?php if ( $imgurl = get_the_post_thumbnail_url($post['id']) ) { // If the post has thumbnail ?>
+                                     src="<?php echo $imgurl; ?>"
+                                 <?php } ?>
+                                 alt="<?php echo get_the_title( $id ); ?>"
+                                 class="wpp-thumbnail wpp_cached_thumb wpp_featured"
+                                 width="<?php echo $size[0]; ?>"
+                                 height="<?php echo $size[1]; ?>"
+                            >
+                        </a>
+                        <a href="<?php echo get_permalink( $id ); ?>"
+                           title="<?php echo get_the_title( $id ); ?>"
+                           class="wpp-post-title" target="_self"><?php echo get_the_title( $id ); ?></a>
+                    </li>
+                    <?php // 画像がない場合の元の書き方は下記 ?>
+                    <?php // <li><a href="' . get_permalink( $id ) . '" title="' . get_the_title( $id ) . '" target="_self"><img title="' . get_the_title( $id ) . '" alt="' . get_the_title( $id ) . '" class="wpp-thumbnail wpp_cached_thumb wpp_first_image" height="200" width="200"></a><div class="thumbnail-title"><a href="' . get_permalink( $id ) . '" title="' . get_the_title( $id ) . '" class="wpp-post-title" target="_self">' . get_the_title( $id ) . '</a></div></li>'; ?>
+                <?php
                 }
                 ?>
             </ul>

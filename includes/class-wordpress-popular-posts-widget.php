@@ -82,10 +82,8 @@ class WPP_Widget extends WP_Widget {
 		        $top_posts = stats_get_csv( 'postviews', 'days=' . $days . '&limit=' . ( $limit + 100 ) );
 		        $posts_to_show = array(); // 実際に表示する投稿
 		        foreach ( $top_posts  as $post ) { // 投稿タイプの絞り込みを行う
-                    // var_dump($post['post_id'], get_post_type( (int)$post['post_id'] ));
 			        if ( (int)$post['post_id'] !== 0 &&
                          get_post_type( (int)$post['post_id'] ) === 'post' ) { // Only for 'post'
-                        // var_dump($post);
                         $posts_to_show[] = $post;
                     }
 			        if ( count( $posts_to_show ) >= $limit ) { // 件数分集まったらやめる
@@ -102,7 +100,7 @@ class WPP_Widget extends WP_Widget {
                            title="<?php echo get_the_title( $id ); ?>"
                            target="_self">
                             <img title="<?php get_the_title( $id ); ?>"
-                                 <?php if ( $imgurl = get_the_post_thumbnail_url($post['id']) ) { // If the post has thumbnail ?>
+                                 <?php if ( $imgurl = get_the_post_thumbnail_url($id) ) { // If the post has thumbnail ?>
                                      src="<?php echo $imgurl; ?>"
                                  <?php } ?>
                                  alt="<?php echo get_the_title( $id ); ?>"

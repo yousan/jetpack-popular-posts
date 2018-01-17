@@ -2,8 +2,8 @@
 /**
  * Plugin Name:     Jetpack Popular Posts
  * Plugin URI:      PLUGIN SITE HERE
- * Description:     PLUGIN DESCRIPTION HERE
- * Author:          YOUR NAME HERE
+ * Description:     Alternative to Wordpress Popular Posts (WPP)
+ * Author:          Yousan_O, miki_sin
  * Author URI:      YOUR SITE HERE
  * Text Domain:     jetpack-popular-posts
  * Domain Path:     /languages
